@@ -20,9 +20,10 @@ const PdfAnalysisSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Explicitly use the "pdf-files" collection
 const PdfAnalysis = mongoose.model('PdfAnalysis', PdfAnalysisSchema, "pdf-files");
 
-// Middleware to handle raw binary data (application/octet-stream)
+// Middleware to handle raw binary data for application/pdf
 app.use(express.raw({ type: 'application/pdf', limit: '20mb' }));
 
 app.get('/', (req, res) => {
@@ -36,14 +37,14 @@ app.post('/extract', async (req, res) => {
             return res.status(400).json({ error: 'No file provided' });
         }
 
-        // Generate unique ID
+        // Generate unique job ID
         const jobId = uuidv4();
 
         // Save initial processing status in MongoDB
         await PdfAnalysis.create({ _id: jobId });
 
-        // Process PDF asynchronously. Wrap the Buffer in an object with a "data" key.
-        pdfParse({ data: req.body })
+        // Process PDF asynchronously by passing the Buffer directly
+        pdfParse(req.body)
             .then(async (data) => {
                 await PdfAnalysis.findByIdAndUpdate(jobId, {
                     status: 'completed',
@@ -55,7 +56,7 @@ app.post('/extract', async (req, res) => {
                 await PdfAnalysis.findByIdAndUpdate(jobId, { status: 'error' });
             });
 
-        // Return the job ID
+        // Return the job ID immediately
         res.json({ jobId });
     } catch (error) {
         console.error('Error starting PDF processing:', error);
@@ -67,11 +68,9 @@ app.post('/extract', async (req, res) => {
 app.get('/status/:id', async (req, res) => {
     try {
         const job = await PdfAnalysis.findById(req.params.id);
-
         if (!job) {
             return res.status(404).json({ error: 'Job not found' });
         }
-
         res.json({ status: job.status, text: job.text });
     } catch (error) {
         console.error('Error fetching job status:', error);
