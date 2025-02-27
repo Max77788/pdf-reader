@@ -2,6 +2,8 @@ const express = require('express');
 const pdfParse = require('pdf-parse');
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const app = express();
 
@@ -19,7 +21,7 @@ const PdfAnalysisSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-const PdfAnalysis = mongoose.model('PdfAnalysis', PdfAnalysisSchema);
+const PdfAnalysis = mongoose.model('PdfAnalysis', PdfAnalysisSchema, "pdf-files");
 
 // Middleware to handle raw binary data (application/octet-stream)
 app.use(express.raw({ type: 'application/pdf', limit: '20mb' }));
