@@ -37,6 +37,8 @@ app.post('/extract', async (req, res) => {
             return res.status(400).json({ error: 'No file provided' });
         }
 
+        console.log(`Received PDF file with ${req.body.length} bytes`);
+
         // Generate unique job ID
         const jobId = uuidv4();
 
