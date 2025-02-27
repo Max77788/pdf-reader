@@ -42,8 +42,8 @@ app.post('/extract', async (req, res) => {
         // Save initial processing status in MongoDB
         await PdfAnalysis.create({ _id: jobId });
 
-        // Process PDF asynchronously
-        pdfParse(req.body)
+        // Process PDF asynchronously. Wrap the Buffer in an object with a "data" key.
+        pdfParse({ data: req.body })
             .then(async (data) => {
                 await PdfAnalysis.findByIdAndUpdate(jobId, {
                     status: 'completed',
