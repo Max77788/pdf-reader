@@ -11,6 +11,11 @@ app.use(express.json({ limit: '20mb' }));
  * Expects a JSON payload with a "fileData" property (base64 encoded PDF).
  * Returns the extracted text from the PDF.
  */
+
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
+
 app.post('/extract', async (req, res) => {
     try {
         const { fileData } = req.body;
